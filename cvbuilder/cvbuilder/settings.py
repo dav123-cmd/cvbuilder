@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/6.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.1/ref/settings/
 """
-
+import dj_database_url
 from pathlib import Path
 import environ
 import os
@@ -106,18 +106,24 @@ WSGI_APPLICATION = 'cvbuilder.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
-
+"""
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-"""
+
 DATABASES = {
     'default': env.db('DATABASE_URL', default='postgres://...')
 }
 """
+
+DATABASES = {
+    'default': env.db('DATABASE_URL', default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}")
+}
+
+
 LOGIN_URL = "users:login"
 LOGIN_REDIRECT_URL="/resume/"
 LOGOUT_REDIRECT="/"
