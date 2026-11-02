@@ -56,7 +56,7 @@ def password_reset_request(request):
     form=PasswordResetRequestForm(request.POST or None ,request.FILES or None)
     if request.method == "POST" and form.is_valid():
         email=form.cleaned_data['email']
-        user=User.objects.get(email=email)
+        user=User.objects.get(email__iexact=email)
         send_password_reset_email(user,email)
         messages.success(request,'Password Reset Link sent to Your Email')
         return redirect("users:login")
