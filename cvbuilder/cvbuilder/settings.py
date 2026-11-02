@@ -186,30 +186,32 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
 
+import os
+from pathlib import Path
+
+# Static configuration
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [
-    BASE_DIR  / "static",
+    BASE_DIR / "static",
 ]
-
-# 2. Keep this as the target destination for collected files
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
+# Media configuration
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
-STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
 
-
-
+# Unified Django 6.x Storage Backend Configurations
 STORAGES = {
     "default": {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
     },
     "staticfiles": {
-        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        # This single line handles both compression and asset caching correctly
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
 
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 
 csrf_env = os.getenv('CSRF_TRUSTED_ORIGINS', '')
 CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in csrf_env.split(',') if origin.strip()]
