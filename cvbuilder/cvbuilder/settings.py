@@ -106,16 +106,39 @@ WSGI_APPLICATION = 'cvbuilder.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
-import dj_database_url
-import os
 
-DATABASES = {
-    'default': dj_database_url.config(
-        default=os.environ.get('DATABASE_URL'),
-        conn_max_age=600,
-        ssl_require=True # Always enforce SSL in production
-    )
-}
+import os
+from urllib.parse import urlparse
+
+# Fetch the raw database connection string from Render's Environment variables
+DATABASE_URL = os.environ.get('DATABASE_URL')
+
+if DATABASE_URL:
+    # Safely break down the postgres://user:password@host:port/dbname URL
+    url = urlparse(DATABASE_URL)
+    
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': url.path[1:],  # Removes the leading slash from the database name
+            'USER': url.username,
+            'PASSWORD': url.password,
+            'HOST': url.hostname,
+            'PORT': url.port or 5432,
+            'CONN_MAX_AGE': 600,
+            'OPTIONS': {
+                'sslmode': 'require',  # Always enforce SSL in production
+            }
+        }
+    }
+else:
+    # Local fallback option if DATABASE_URL doesn't exist yet on your local machine
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'db.sqlite3'),
+        }
+    }
 
 
 
