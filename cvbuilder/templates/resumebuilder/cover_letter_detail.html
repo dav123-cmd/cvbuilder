@@ -1,0 +1,25 @@
+{% extends "resumebuilder/base.html" %}
+{% block title %}Cover letter{% endblock %}
+
+{% block content %}
+<span class="eyebrow">{{ letter.company_name|default:"Draft" }}</span>
+<h1 style="font-size: 26px; margin-bottom: 24px;">{{ letter.job_title|default:"Cover letter" }}</h1>
+
+<div class="card" style="font-family: 'Fraunces', serif; font-size: 16px; line-height: 1.75; white-space: pre-wrap;">{{ letter.generated_text }}</div>
+
+<button class="btn btn-primary" onclick="copyLetter()">Copy text</button>
+<a href="{% url 'cover_letter_download_pdf' letter.resume_id letter.id %}" class="btn btn-stamp">Download PDF ↓</a>
+<a href="{% url 'resume_edit' letter.resume_id %}" class="btn btn-ghost">Back to resume</a>
+
+<textarea id="letter-raw" style="position: absolute; left: -9999px;">{{ letter.generated_text }}</textarea>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function copyLetter() {
+  const el = document.getElementById('letter-raw');
+  el.select();
+  document.execCommand('copy');
+}
+</script>
+{% endblock %}

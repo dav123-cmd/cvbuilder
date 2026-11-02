@@ -1,0 +1,81 @@
+{% extends "resumebuilder/base.html" %}
+{% block title %}Unlock this template{% endblock %}
+
+{% block content %}
+<span class="eyebrow">Premium</span>
+<h1 style="font-size: 26px; margin-bottom: 12px;">Unlock the full resume</h1>
+<p style="color: var(--ink-soft); margin-bottom: 24px;">
+  Remove the watermark, unlock every template, and get unlimited AI rewrites for {{ resume.full_name }}'s resume.
+</p>
+
+<div class="card">
+  <span class="eyebrow">One-time unlock — KES 200</span>
+
+  <div id="pay-form">
+    <label for="phone_number">M-Pesa number</label>
+    <input type="tel" id="phone_number" placeholder="07XX XXX XXX">
+    <button class="btn btn-stamp" style="margin-top: 16px;" onclick="startPayment()">Pay with M-Pesa</button>
+  </div>
+
+  <div id="pay-status" style="display: none; margin-top: 16px;">
+    <p class="mono" id="pay-message">Check your phone and enter your M-Pesa PIN…</p>
+  </div>
+</div>
+
+<a href="{% url 'resume_edit' resume.id %}" class="btn btn-ghost">Back to resume</a>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function getCookie(name) {
+  const match = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+  return match ? match.pop() : '';
+}
+
+let pollTimer = null;
+
+async function startPayment() {
+  const phone = document.getElementById('phone_number').value.trim();
+  if (!phone) return;
+
+  document.getElementById('pay-form').style.display = 'none';
+  document.getElementById('pay-status').style.display = 'block';
+
+  const body = new URLSearchParams({ phone_number: phone });
+  const res = await fetch('{% url "upgrade_initiate" resume.id %}', {
+    method: 'POST',
+    headers: {
+      'X-CSRFToken': getCookie('csrftoken'),
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body,
+  });
+  const data = await res.json();
+
+  if (!res.ok) {
+    document.getElementById('pay-message').textContent = data.error;
+    document.getElementById('pay-form').style.display = 'block';
+    document.getElementById('pay-status').style.display = 'none';
+    return;
+  }
+
+  pollTimer = setInterval(checkStatus, 3000);
+}
+
+async function checkStatus() {
+  const res = await fetch('{% url "upgrade_status" resume.id %}');
+  const data = await res.json();
+
+  if (data.status === 'success') {
+    clearInterval(pollTimer);
+    document.getElementById('pay-message').innerHTML = '<span class="stamp-mark animate-in">unlocked</span> Redirecting…';
+    setTimeout(() => window.location.href = '{% url "resume_edit" resume.id %}', 1200);
+  } else if (data.status === 'failed') {
+    clearInterval(pollTimer);
+    document.getElementById('pay-message').textContent = 'Payment did not go through. Try again.';
+    document.getElementById('pay-form').style.display = 'block';
+    document.getElementById('pay-status').style.display = 'none';
+  }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>{{ resume.full_name }} — Resume</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  @page { margin: 2cm; }
+  body {
+    font-family: 'Inter', sans-serif;
+    color: #1C1B19;
+    font-size: 13px;
+    line-height: 1.5;
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 40px;
+    position: relative;
+  }
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-size: 30px;
+    font-weight: 700;
+    margin: 0 0 4px;
+  }
+  .contact-line {
+    font-size: 12px;
+    color: #5A5650;
+    margin-bottom: 24px;
+  }
+  .contact-line span:not(:last-child)::after { content: " · "; }
+
+  h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #2D3A6B;
+    border-bottom: 1px solid #DDD8CB;
+    padding-bottom: 4px;
+    margin: 24px 0 12px;
+  }
+
+  .summary { font-size: 13.5px; margin-bottom: 4px; }
+
+  .entry { margin-bottom: 16px; }
+  .entry-header {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 600;
+  }
+  .entry-sub {
+    font-size: 12px;
+    color: #5A5650;
+    margin-bottom: 6px;
+  }
+  ul.bullets { margin: 0; padding-left: 18px; }
+  ul.bullets li { margin-bottom: 3px; }
+
+  .skills-list { display: flex; flex-wrap: wrap; gap: 6px; }
+  .skill-chip {
+    font-size: 11.5px;
+    background: #E8EBF3;
+    color: #2D3A6B;
+    padding: 3px 9px;
+    border-radius: 3px;
+  }
+
+  .watermark {
+    position: fixed;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-30deg);
+    font-family: 'Fraunces', serif;
+    font-size: 64px;
+    font-weight: 700;
+    color: rgba(166, 58, 44, 0.08);
+    z-index: -1;
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+
+{% if watermark %}<div class="watermark">CVDRAFT — UNLOCK TO REMOVE</div>{% endif %}
+
+<h1>{{ resume.full_name }}</h1>
+<div class="contact-line">
+  {% if resume.location %}<span>{{ resume.location }}</span>{% endif %}
+  {% if resume.email %}<span>{{ resume.email }}</span>{% endif %}
+  {% if resume.phone %}<span>{{ resume.phone }}</span>{% endif %}
+</div>
+
+{% if resume.professional_summary %}
+<h2>Summary</h2>
+<p class="summary">{{ resume.professional_summary }}</p>
+{% endif %}
+
+{% if resume.work_experiences.all %}
+<h2>Experience</h2>
+{% for exp in resume.work_experiences.all %}
+<div class="entry">
+  <div class="entry-header">
+    <span>{{ exp.job_title }}, {{ exp.company }}</span>
+    <span>{{ exp.start_date|date:"M Y" }} – {% if exp.is_current %}Present{% else %}{{ exp.end_date|date:"M Y" }}{% endif %}</span>
+  </div>
+  {% if exp.location %}<div class="entry-sub">{{ exp.location }}</div>{% endif %}
+  <ul class="bullets">
+    {% for bullet in exp.bullet_list %}<li>{{ bullet }}</li>{% endfor %}
+  </ul>
+</div>
+{% endfor %}
+{% endif %}
+
+{% if resume.education_entries.all %}
+<h2>Education</h2>
+{% for edu in resume.education_entries.all %}
+<div class="entry">
+  <div class="entry-header">
+    <span>{{ edu.qualification }}, {{ edu.institution }}</span>
+    <span>{% if edu.end_date %}{{ edu.end_date|date:"Y" }}{% endif %}</span>
+  </div>
+  {% if edu.notes %}<div class="entry-sub">{{ edu.notes }}</div>{% endif %}
+</div>
+{% endfor %}
+{% endif %}
+
+{% if resume.skills.all %}
+<h2>Skills</h2>
+<div class="skills-list">
+  {% for skill in resume.skills.all %}<span class="skill-chip">{{ skill.name }}</span>{% endfor %}
+</div>
+{% endif %}
+
+</body>
+</html>

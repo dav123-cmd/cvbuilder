@@ -1,0 +1,33 @@
+{% extends "resumebuilder/base.html" %}
+{% block title %}Write a cover letter{% endblock %}
+
+{% block content %}
+<span class="eyebrow">For {{ resume.full_name }}</span>
+<h1 style="font-size: 26px; margin-bottom: 24px;">Write a cover letter</h1>
+
+<form method="post">
+  {% csrf_token %}
+  <div class="card">
+    <div class="row-flex">
+      <div>
+        <label for="{{ form.job_title.id_for_label }}">Job title</label>
+        {{ form.job_title }}
+      </div>
+      <div>
+        <label for="{{ form.company_name.id_for_label }}">Company name</label>
+        {{ form.company_name }}
+      </div>
+    </div>
+
+    <label for="{{ form.job_description.id_for_label }}">Job description</label>
+    {{ form.job_description }}
+    <p class="helper-text">Paste the full listing — the more detail, the sharper the tailoring.</p>
+
+    <label for="{{ form.tone.id_for_label }}">Tone</label>
+    {{ form.tone }}
+  </div>
+
+  <button type="submit" class="btn btn-stamp">Generate cover letter →</button>
+  <a href="{% url 'resume_edit' resume.id %}" class="btn btn-ghost">Back to resume</a>
+</form>
+{% endblock %}

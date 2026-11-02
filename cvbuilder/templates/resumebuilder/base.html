@@ -1,0 +1,235 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}Resume Builder{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="{% static 'css/david.css' %}">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #F7F4ED;
+    --paper-raised: #FFFDF8;
+    --ink: #1C1B19;
+    --ink-soft: #5A5650;
+    --indigo: #2D3A6B;
+    --indigo-soft: #E8EBF3;
+    --stamp: #A63A2C;
+    --stamp-soft: #F6E6E2;
+    --line: #DDD8CB;
+    --radius: 3px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    line-height: 1.55;
+  }
+
+  h1, h2, h3, .display {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+
+  .mono {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+
+  a { color: var(--indigo); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  .shell {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 0 20px 80px;
+  }
+
+  header.site {
+    border-bottom: 1px solid var(--line);
+    padding: 20px 20px;
+    margin-bottom: 40px;
+  }
+  header.site .inner {
+    max-width: 760px;
+    margin: 0 auto;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+  }
+  header.site .brand {
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: 20px;
+  }
+  header.site .brand .mark {
+    color: var(--stamp);
+  }
+
+  .card {
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+
+  .eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--indigo);
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  label {
+    display: block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--ink-soft);
+    margin-bottom: 6px;
+    margin-top: 18px;
+  }
+  label:first-child { margin-top: 0; }
+
+  input[type="text"], input[type="email"], input[type="tel"], input[type="date"],
+  textarea, select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--paper);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: var(--ink);
+  }
+  input:focus, textarea:focus, select:focus {
+    outline: 2px solid var(--indigo);
+    outline-offset: 1px;
+  }
+  textarea { resize: vertical; min-height: 80px; }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: var(--radius);
+    border: 1px solid transparent;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .btn-primary { background: var(--indigo); color: white; }
+  .btn-primary:hover { background: #24305C; }
+  .btn-stamp { background: var(--stamp); color: white; }
+  .btn-stamp:hover { background: #8C3024; }
+  .btn-ghost { background: transparent; border-color: var(--line); color: var(--ink); }
+  .btn-ghost:hover { background: var(--indigo-soft); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .bullet-block {
+    border-left: 2px solid var(--line);
+    padding-left: 14px;
+    margin-top: 10px;
+  }
+  .bullet-block.polished { border-left-color: var(--indigo); }
+
+  .stamp-mark {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--indigo);
+    border: 1px solid var(--indigo);
+    border-radius: 2px;
+    padding: 2px 6px;
+    transform: rotate(-2deg);
+  }
+
+  .messages { list-style: none; padding: 0; margin: 0 0 20px; }
+  .messages li {
+    padding: 10px 14px;
+    border-radius: var(--radius);
+    margin-bottom: 8px;
+    font-size: 14px;
+    background: var(--indigo-soft);
+    border: 1px solid var(--indigo);
+  }
+  .messages li.error, .messages li.warning {
+    background: var(--stamp-soft);
+    border-color: var(--stamp);
+  }
+
+  .formset-row {
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 18px;
+    margin-bottom: 14px;
+    position: relative;
+  }
+
+  .row-flex { display: flex; gap: 14px; }
+  .row-flex > * { flex: 1; }
+
+  .helper-text {
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-top: 4px;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .stamp-mark.animate-in {
+      animation: stampIn 0.35s ease-out;
+    }
+  }
+  @keyframes stampIn {
+    from { opacity: 0; transform: rotate(-2deg) scale(1.4); }
+    to { opacity: 1; transform: rotate(-2deg) scale(1); }
+  }
+</style>
+{% block extra_head %}{% endblock %}
+</head>
+<body>
+<header class="site">
+  <div class="inner">
+    <a href="{% url 'resume_list' %}" class="brand">CV<span class="mark">Draft</span></a>
+    <span class="mono">{% block header_right %}{% endblock %}</span>
+  </div>
+</header>
+
+<div class="shell">
+  {% if messages %}
+  <ul class="messages">
+    {% for message in messages %}
+    <li class="{{ message.tags }}">{{ message }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+
+  {% block content %}{% endblock %}
+</div>
+
+{% block extra_scripts %}{% endblock %}
+</body>
+</html>

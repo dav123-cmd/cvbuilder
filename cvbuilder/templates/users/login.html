@@ -1,0 +1,95 @@
+{% extends "resumebuilder/base.html" %}
+{% block title %}Unlock this template{% endblock %}
+
+{% block content %}
+<section class="auth-page-container ">
+
+    <h2>Welcome to CVDraft</h2>
+    <p>Don't have an account? <a href="{% url 'users:register' %}">Sign Up</a></p>
+
+    
+
+
+<form method="POST" class="form_reg" > 
+    {% csrf_token %} 
+    <input type="hidden" name="next" value="{{ next }}">
+    
+    
+
+{% if form.non_field_errors %}
+        <div class="error-text" style="color: red; margin-bottom: 1rem;">
+            {{ form.non_field_errors }}
+        </div>
+    {% endif %}
+
+
+
+    <div class="field"> 
+        <label for="email">Email</label> 
+        <input type="email" name="email" id="email" required placeholder="cvdraft@gmail.com" value="{{ form.email.value|default:'' }}"> 
+        {% for error in form.email.errors %} <span class="error-text">{{ error }}</span> {% endfor %}
+    </div> 
+    
+     
+
+
+<div class="field" style="position: relative;">
+    <label for="password">Password</label>
+    <input type="password" name="password" id="password" class="form-input" placeholder="Min. 8 characters" required />
+    <button type="button" onclick="togglePwd('password', this)" style="position: absolute; right: 1rem; top: 35%; transform: translateY(-50%); color: var(--text-muted); background: none; border: none; cursor: pointer;">
+        <i class="fa-regular fa-eye"></i>
+    </button>
+    <div class="pwd-wrap">
+    <p ><a href="{% url 'users:password_reset_request' %}">Forgot password?</a></p>
+    {% for error in form.password.errors %}</div>
+    <span class="error-text">{{ error }}</span>
+    {% endfor %}
+</div>
+
+
+
+
+    <div class="terms">
+    <input type="checkbox" name="remember" id="remember_me" {% if form.remember.value %}checked{% endif %}>
+    <label for="remember_me">Remember me</label>
+    {% for error in form.remember.errors %} <span class="error-text">{{ error }}</span> {% endfor %}
+</div>
+    
+    <button type="submit">Sign In</button> 
+</form>
+
+    {% url 'socialaccount_signup' as socialaccount_signup_url %}
+    {% if socialaccount_signup_url %}
+    <div class="divider">or Sign In with</div>
+    <div class="social_row">
+       <a href="{{ socialaccount_signup_url }}?provider=google"> <button type="button"   class="social_btn" id="google_signup">
+            <svg width="18" height="18" viewBox="0 0 48 48">
+                <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.6-6 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l6-6C34.6 5.4 29.6 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21 21-9.4 21-21c0-1.4-.1-2.7-.4-3.5z"/>
+                <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.9 19 13 24 13c3.1 0 5.8 1.1 8 3l6-6C34.6 5.4 29.6 3 24 3c-7.5 0-14 4.2-17.7 10.4z"/>
+                <path fill="#4CAF50" d="M24 45c5.5 0 10.4-2.1 14.1-5.6l-6.5-5.5C29.6 35.5 27 36.5 24 36.5c-5.3 0-9.7-3.4-11.3-8.1l-6.6 5.1C9.9 40.6 16.4 45 24 45z"/>
+                <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.2 4.2-4.1 5.6l6.5 5.5C41.4 36 45 30.5 45 24c0-1.4-.1-2.7-.4-3.5z"/>
+            </svg>
+           Continue  Google
+        </button></a>
+    </div>
+    {% endif %}
+</section>
+
+
+<script>
+function togglePwd(inputId, btn) {
+    const input = document.getElementById(inputId);
+    const icon = btn.querySelector('i');
+    
+    if (input.type === "password") {
+        input.type = "text";
+        icon.classList.remove("fa-eye");
+        icon.classList.add("fa-eye-slash");
+    } else {
+        input.type = "password";
+        icon.classList.remove("fa-eye-slash");
+        icon.classList.add("fa-eye");
+    }
+}
+</script>
+{% endblock content %}

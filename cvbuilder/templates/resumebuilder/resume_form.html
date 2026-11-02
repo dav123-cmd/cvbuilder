@@ -1,0 +1,191 @@
+{% extends "resumebuilder/base.html" %}
+{% block title %}Edit resume{% endblock %}
+{% block header_right %}{% if not is_new %}Editing{% endif %}{% endblock %}
+
+{% block content %}
+<span class="eyebrow">{% if is_new %}Step 1{% else %}Draft{% endif %}</span>
+<h1 style="font-size: 28px; margin-bottom: 24px;">
+  {% if is_new %}Start your resume{% else %}{{ resume.full_name }}{% endif %}
+</h1>
+
+<form method="post" id="resume-form">
+  {% csrf_token %}
+
+  <div class="card">
+    <span class="eyebrow">About you</span>
+    <label for="{{ form.full_name.id_for_label }}">Full name</label>
+    {{ form.full_name }}
+
+    <div class="row-flex">
+      <div>
+        <label for="{{ form.email.id_for_label }}">Email</label>
+        {{ form.email }}
+      </div>
+      <div>
+        <label for="{{ form.phone.id_for_label }}">Phone</label>
+        {{ form.phone }}
+      </div>
+    </div>
+
+    <label for="{{ form.location.id_for_label }}">Location</label>
+    {{ form.location }}
+
+    <label for="{{ form.template.id_for_label }}">Template</label>
+    {{ form.template }}
+
+    <label for="{{ form.professional_summary.id_for_label }}">Professional summary</label>
+    {{ form.professional_summary }}
+    {% if not is_new %}
+    <button type="button" class="btn btn-ghost" style="margin-top: 8px;"
+            onclick="generateSummary('{{ resume.id }}')">✎ Draft this with AI</button>
+    {% endif %}
+
+    <label for="{{ form.target_job_title.id_for_label }}">Target job title <span style="opacity:0.6;">(optional)</span></label>
+    {{ form.target_job_title }}
+
+    <label for="{{ form.target_job_description.id_for_label }}">Target job description <span style="opacity:0.6;">(optional — improves tailoring)</span></label>
+    {{ form.target_job_description }}
+  </div>
+
+  {% if not is_new %}
+  <div class="card">
+    <span class="eyebrow">Work experience</span>
+    {{ work_formset.management_form }}
+    {% for wform in work_formset %}
+      <div class="formset-row">
+        {{ wform.id }}
+        <div class="row-flex">
+          <div>
+            <label>Job title</label>
+            {{ wform.job_title }}
+          </div>
+          <div>
+            <label>Company</label>
+            {{ wform.company }}
+          </div>
+        </div>
+        <div class="row-flex">
+          <div>
+            <label>Start date</label>
+            {{ wform.start_date }}
+          </div>
+          <div>
+            <label>End date</label>
+            {{ wform.end_date }}
+          </div>
+        </div>
+        <label style="display: flex; align-items: center; gap: 6px; text-transform: none; font-family: 'Inter', sans-serif; font-size: 13px;">
+          {{ wform.is_current }} I currently work here
+        </label>
+        <label>What did you actually do here?</label>
+        {{ wform.raw_description }}
+
+        {% if wform.instance.pk %}
+        <button type="button" class="btn btn-primary" style="margin-top: 10px;"
+                onclick="rewriteBullets({{ wform.instance.pk }}, this)">✎ Rewrite with AI</button>
+        <div class="bullet-output" id="bullets-{{ wform.instance.pk }}">
+          {% if wform.instance.ai_bullet_points %}
+            <div class="bullet-block polished">
+              <span class="stamp-mark">polished</span>
+              <ul>
+                {% for b in wform.instance.bullet_list %}<li>{{ b }}</li>{% endfor %}
+              </ul>
+            </div>
+          {% endif %}
+        </div>
+        {% else %}
+        <p class="helper-text">Save the resume first to unlock AI rewriting for this role.</p>
+        {% endif %}
+
+        {% if wform.instance.pk %}<label style="text-transform: none; font-family: 'Inter', sans-serif; font-size: 13px;">{{ wform.DELETE }} Remove this role</label>{% endif %}
+      </div>
+    {% endfor %}
+  </div>
+
+  <div class="card">
+    <span class="eyebrow">Education</span>
+    {{ edu_formset.management_form }}
+    {% for eform in edu_formset %}
+      <div class="formset-row">
+        {{ eform.id }}
+        <div class="row-flex">
+          <div><label>Institution</label>{{ eform.institution }}</div>
+          <div><label>Qualification</label>{{ eform.qualification }}</div>
+        </div>
+        <div class="row-flex">
+          <div><label>Start date</label>{{ eform.start_date }}</div>
+          <div><label>End date</label>{{ eform.end_date }}</div>
+        </div>
+        {% if eform.instance.pk %}<label style="text-transform: none; font-family: 'Inter', sans-serif; font-size: 13px;">{{ eform.DELETE }} Remove</label>{% endif %}
+      </div>
+    {% endfor %}
+  </div>
+
+  <div class="card">
+    <span class="eyebrow">Skills</span>
+    {{ skill_formset.management_form }}
+    <div class="row-flex" style="flex-wrap: wrap;">
+      {% for sform in skill_formset %}
+        <div style="min-width: 160px;">
+          {{ sform.id }}
+          {{ sform.name }}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <button type="submit" class="btn btn-stamp">{% if is_new %}Create resume →{% else %}Save changes{% endif %}</button>
+  {% if not is_new %}
+  <a href="{% url 'cover_letter_create' resume.id %}" class="btn btn-ghost">Write a cover letter</a>
+  <a href="{% url 'resume_preview' resume.id %}" class="btn btn-ghost">Preview</a>
+  <a href="{% url 'resume_download_pdf' resume.id %}" class="btn btn-stamp">Download PDF ↓</a>
+  {% endif %}
+</form>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function getCookie(name) {
+  const match = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+  return match ? match.pop() : '';
+}
+
+async function rewriteBullets(experienceId, btn) {
+  btn.disabled = true;
+  btn.textContent = 'Rewriting…';
+  try {
+    const res = await fetch(`/resume/experience/${experienceId}/rewrite/`, {
+      method: 'POST',
+      headers: { 'X-CSRFToken': getCookie('csrftoken') },
+    });
+    const data = await res.json();
+    const output = document.getElementById(`bullets-${experienceId}`);
+    if (!res.ok) {
+      output.innerHTML = `<p class="helper-text" style="color: var(--stamp);">${data.error}</p>`;
+    } else {
+      const items = data.bullets.map(b => `<li>${b}</li>`).join('');
+      output.innerHTML = `
+        <div class="bullet-block polished">
+          <span class="stamp-mark animate-in">polished</span>
+          <ul>${items}</ul>
+        </div>`;
+    }
+  } finally {
+    btn.disabled = false;
+    btn.textContent = ' Rewrite with AI';
+  }
+}
+
+async function generateSummary(resumeId) {
+  const res = await fetch(`/resume/${resumeId}/generate-summary/`, {
+    method: 'POST',
+    headers: { 'X-CSRFToken': getCookie('csrftoken') },
+  });
+  const data = await res.json();
+  if (res.ok) {
+    document.getElementById('{{ form.professional_summary.id_for_label }}').value = data.summary;
+  }
+}
+</script>
+{% endblock %}
