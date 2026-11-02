@@ -95,19 +95,34 @@
 </section>
 
 <script>
-function togglePwd(inputId, btn) {
-    const input = document.getElementById(inputId);
-    const icon = btn.querySelector('i');
-    
-    if (input.type === "password") {
-        input.type = "text";
-        icon.classList.remove("fa-eye");
-        icon.classList.add("fa-eye-slash");
+function togglePwd(inputId, buttonElement) {
+    // Find the specific password input field using its ID
+    const pwdInput = document.getElementById(inputId);
+    // Find the icon element inside the clicked button
+    const icon = buttonElement.querySelector('i');
+
+    if (pwdInput.type === 'password') {
+        // Switch input to plain text to reveal password
+        pwdInput.type = 'text';
+        
+        // Change eye icon to eye-slash icon
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+        
+        // Update accessibility label
+        buttonElement.setAttribute('aria-label', 'Hide password');
     } else {
-        input.type = "password";
-        icon.classList.remove("fa-eye-slash");
-        icon.classList.add("fa-eye");
+        // Switch input back to password
+        pwdInput.type = 'password';
+        
+        // Change eye-slash icon back to eye icon
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+        
+        // Update accessibility label
+        buttonElement.setAttribute('aria-label', 'Show password');
     }
 }
+
 </script>
 {% endblock content %}
