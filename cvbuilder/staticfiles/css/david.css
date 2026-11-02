@@ -116,6 +116,17 @@ a:hover { color: var(--stamp); }
 }
 .pwd-toggle:hover { color: var(--indigo); background: var(--indigo-soft); }
 
+* Add these improvements for keyboard focus and active click states */
+.pwd-toggle:focus-visible {
+  outline: 2px solid var(--indigo);
+  outline-offset: -2px;
+}
+.pwd-toggle:active {
+  transform: translateY(-50%) scale(0.95); /* Subtle click depression effect */
+}
+
+
+
 /* Errors */
 .form-errors {
   margin-bottom: 1rem;
