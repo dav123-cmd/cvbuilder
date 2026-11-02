@@ -110,7 +110,7 @@ a:hover { color: var(--stamp); }
   place-items: center;
   background: none;
   border: 0;
-  color: var(--ink-soft);
+  color: black;
   cursor: pointer;
   border-radius: var(--radius);
 }
