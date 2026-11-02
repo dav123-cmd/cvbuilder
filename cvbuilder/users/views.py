@@ -52,15 +52,24 @@ def logout_view(request):
     messages.info(request,'You have been Logout Out')
     return redirect ("resume_list")
 
+
 def password_reset_request(request):
-    form=PasswordResetRequestForm(request.POST or None ,request.FILES or None)
+    form = PasswordResetRequestForm(request.POST or None, request.FILES or None)
     if request.method == "POST" and form.is_valid():
-        email=form.cleaned_data['email']
-        user=User.objects.get(email__iexact=email)
-        send_password_reset_email(user,email)
-        messages.success(request,'Password Reset Link sent to Your Email')
+        email = form.cleaned_data['email']
+        user = User.objects.filter(email__iexact=email).first()
+        if user:
+            try:
+                send_password_reset_email(user, email)
+            except Exception:
+                import logging
+                logging.getLogger(__name__).exception("Password reset email failed")
+        messages.success(request, 'If that email is registered, a reset link has been sent.')
         return redirect("users:login")
-    return render(request,"users/password_reset.html",{"form":form})
+    return render(request, "users/password_reset.html", {"form": form})
+
+
+
 
 def password_reset_confirm(request,token):
     token_obj=get_object_or_404(PasswordResetToken,token=token)
