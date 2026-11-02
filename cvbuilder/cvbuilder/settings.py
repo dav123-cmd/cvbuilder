@@ -83,7 +83,7 @@ ACCOUNT_SIGNUP_FIELDS = [
 ]
 
 
-
+AUTH_USER_MODEL = "users.User"
 
 
 ROOT_URLCONF = 'cvbuilder.urls'

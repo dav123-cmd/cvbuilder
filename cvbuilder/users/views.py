@@ -35,7 +35,7 @@ def login(request):
     if request.user.is_authenticated:
         return redirect(next_url)
 
-    form = LoginForm(request.POST or None, request.FILES or None)
+    form = LoginForm(request.POST or None, request=request)
     if request.method == "POST" and form.is_valid():
         user = form.get_user()
         auth_login(request, user)
